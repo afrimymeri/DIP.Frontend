@@ -66,7 +66,9 @@ const password = ref('')
 async function handleSignup() {
   try {
     await auth.signup({ name: name.value, email: email.value, password: password.value })
-    router.push('/') // redirect
-  } catch (err) {}
+    router.push('/')
+  } catch {
+    // Error is already set in the store
+  }
 }
 </script>

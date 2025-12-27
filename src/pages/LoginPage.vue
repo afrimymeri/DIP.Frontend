@@ -55,10 +55,11 @@ import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import AuthForm from '@/components/Auth/AuthForm.vue'
 import InputField from '@/components/InputField.vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 const auth = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 
 const email = ref('')
 const password = ref('')
@@ -66,9 +67,10 @@ const password = ref('')
 async function handleLogin() {
   try {
     await auth.login({ email: email.value, password: password.value })
-    router.push('/')
-  } catch (err) {
-    console.error('Login error:', err)
+    const redirect = (route.query.redirect as string) || '/'
+    router.push(redirect)
+  } catch {
+    // Error is already set in the store
   }
 }
 </script>

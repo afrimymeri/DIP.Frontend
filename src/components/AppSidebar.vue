@@ -2,7 +2,7 @@
   <v-navigation-drawer expand-on-hover permanent rail>
     <v-list>
       <v-list-item
-        :prepend-avatar="user?.avatar || 'https://randomuser.me/api/portraits/lego/1.jpg'"
+        prepend-avatar="https://randomuser.me/api/portraits/lego/1.jpg"
         :subtitle="user?.email || 'Guest'"
         :title="user?.name || 'Guest User'"
       ></v-list-item>
@@ -30,17 +30,14 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
-import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
-const { user, token } = storeToRefs(authStore)
+const { user, isAuthenticated } = storeToRefs(authStore)
 const router = useRouter()
 
-const isAuthenticated = computed(() => !!token.value)
-
-function logout() {
-  authStore.logout()
+async function logout() {
+  await authStore.logout()
   router.push('/login')
 }
 </script>
