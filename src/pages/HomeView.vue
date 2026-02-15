@@ -8,8 +8,23 @@ import FetchSourcesModal from '@/components/Literature/FetchSourcesModal.vue'
 import ResultsInfo from '@/components/Literature/ResultsInfo.vue'
 
 const store = useLiteratureStore()
-const { query, results, loading, fetchLoading, error, searched, showFetchModal, selectedSources } =
-  storeToRefs(store)
+const {
+  query,
+  results,
+  loading,
+  fetchLoading,
+  error,
+  searched,
+  showFetchModal,
+  selectedSources,
+  currentPage,
+  totalPages,
+  paginatedResults,
+} = storeToRefs(store)
+
+function onPageChange() {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
 </script>
 
 <template>
@@ -43,11 +58,23 @@ const { query, results, loading, fetchLoading, error, searched, showFetchModal, 
 
     <ResultsInfo
       v-if="searched && !loading && results.length > 0"
-      :count="results.length"
+      :total="results.length"
+      :page="currentPage"
+      :items-per-page="store.itemsPerPage"
       @fetch="showFetchModal = true"
     />
 
-    <LiteratureCard v-for="item in results" :key="item.id" :item="item" />
+    <LiteratureCard v-for="item in paginatedResults" :key="item.id" :item="item" />
+
+    <v-pagination
+      v-if="totalPages >= 2"
+      v-model="currentPage"
+      :length="totalPages"
+      :total-visible="5"
+      rounded="circle"
+      class="my-6"
+      @update:model-value="onPageChange"
+    />
 
     <FetchSourcesModal
       v-model="showFetchModal"

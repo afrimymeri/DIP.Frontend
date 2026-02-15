@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useLiterature } from '@/composables/useLiterature'
 import { AVAILABLE_SOURCES, type Literature } from '@/types/literature'
 
@@ -12,6 +12,14 @@ export const useLiteratureStore = defineStore('literature', () => {
   const searched = ref(false)
   const showFetchModal = ref(false)
   const selectedSources = ref<number[]>(AVAILABLE_SOURCES.map((s) => s.id))
+  const currentPage = ref(1)
+  const itemsPerPage = ref(5)
+
+  const totalPages = computed(() => Math.ceil(results.value.length / itemsPerPage.value))
+  const paginatedResults = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage.value
+    return results.value.slice(start, start + itemsPerPage.value)
+  })
 
   const { searchLocal: apiSearchLocal, fetchFromSources: apiFetchFromSources } = useLiterature()
 
@@ -21,6 +29,7 @@ export const useLiteratureStore = defineStore('literature', () => {
     loading.value = true
     error.value = null
     searched.value = true
+    currentPage.value = 1
 
     try {
       results.value = await apiSearchLocal(query.value)
@@ -36,6 +45,7 @@ export const useLiteratureStore = defineStore('literature', () => {
 
     fetchLoading.value = true
     error.value = null
+    currentPage.value = 1
 
     try {
       results.value = await apiFetchFromSources({
@@ -73,6 +83,10 @@ export const useLiteratureStore = defineStore('literature', () => {
     searched,
     showFetchModal,
     selectedSources,
+    currentPage,
+    itemsPerPage,
+    totalPages,
+    paginatedResults,
     searchLocal,
     fetchFromSources,
     selectAllSources,
