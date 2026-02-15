@@ -1,64 +1,75 @@
-# DIP.Frontend
+# DIP Frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+**DIP (Digital Information Platform)** is a web application that provides a unified interface for searching scientific papers across multiple academic databases.
 
-## Recommended IDE Setup
+## Supported Sources
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- Semantic Scholar
+- DBLP
+- OpenAlex
+- CrossRef
+- arXiv
+- IEEE Xplore
+- ACM Digital Library
 
-## Type Support for `.vue` Imports in TS
+## Tech Stack
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+- **Framework**: Vue 3 (Composition API + TypeScript)
+- **Build Tool**: Vite
+- **UI Library**: Vuetify 3 (Material Design)
+- **State Management**: Pinia
+- **Routing**: Vue Router 4
+- **Testing**: Vitest (unit), Playwright (E2E)
 
-## Customize configuration
+## Getting Started
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+### Prerequisites
 
-## Project Setup
+- Node.js 20.19+ or 22.12+
+- The [DIP.Backend](../DIP.Backend) "https://github.com/afrimymeri/DIP.Backend" API running on `http://localhost:5142`
 
-```sh
+### Installation
+
+```bash
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+### Environment Setup
 
-```sh
+Create a `.env` file in the project root:
+
+```env
+VITE_API_URL=http://localhost:5142
+```
+
+### Development
+
+```bash
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+## Available Scripts
 
-```sh
-npm run build
+| Command             | Description                      |
+| ------------------- | -------------------------------- |
+| `npm run dev`       | Start dev server with hot reload |
+| `npm run build`     | Type-check + production build    |
+| `npm run preview`   | Preview production build         |
+| `npm run test:unit` | Run unit tests (Vitest)          |
+| `npm run test:e2e`  | Run E2E tests (Playwright)       |
+| `npm run lint`      | Lint and auto-fix with ESLint    |
+| `npm run format`    | Format code with Prettier        |
+
+## Project Structure
+
 ```
-
-### Run Unit Tests with [Vitest](https://vitest.dev/)
-
-```sh
-npm run test:unit
-```
-
-### Run End-to-End Tests with [Playwright](https://playwright.dev)
-
-```sh
-# Install browsers for the first run
-npx playwright install
-
-# When testing on CI, must build the project first
-npm run build
-
-# Runs the end-to-end tests
-npm run test:e2e
-# Runs the tests only on Chromium
-npm run test:e2e -- --project=chromium
-# Runs the tests of a specific file
-npm run test:e2e -- tests/example.spec.ts
-# Runs the tests in debug mode
-npm run test:e2e -- --debug
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
+src/
+├── pages/           # Route page components
+├── components/      # Reusable components (organized by feature)
+├── composables/     # Vue composition functions
+├── stores/          # Pinia state stores
+├── router/          # Route definitions
+├── plugins/         # Vue plugins (Vuetify)
+├── types/           # TypeScript type definitions
+└── assets/          # Static files and styles
 ```
