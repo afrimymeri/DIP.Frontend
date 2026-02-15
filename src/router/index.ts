@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../pages/HomeView.vue'
 import LoginPage from '@/pages/LoginPage.vue'
 import SignupPage from '@/pages/SignupPage.vue'
+import NotFoundPage from '@/pages/NotFoundPage.vue'
+import AboutView from '../pages/AboutView.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
@@ -16,7 +18,7 @@ const router = createRouter({
     {
       path: '/about',
       name: 'about',
-      component: () => import('../pages/AboutView.vue'),
+      component: AboutView,
       meta: { requiresAuth: true },
     },
     {
@@ -30,6 +32,11 @@ const router = createRouter({
       name: 'signup',
       component: SignupPage,
       meta: { guestOnly: true },
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: NotFoundPage,
     },
   ],
 })

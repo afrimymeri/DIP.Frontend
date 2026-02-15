@@ -14,10 +14,12 @@ const app = createApp(App)
 const pinia = createPinia()
 
 app.use(pinia)
+
+// Initialize auth BEFORE router to ensure guards have correct auth state
+const authStore = useAuthStore()
+await authStore.initialize()
+
 app.use(router)
 app.use(vuetify)
 
-const authStore = useAuthStore()
-authStore.initialize().then(() => {
-  app.mount('#app')
-})
+app.mount('#app')

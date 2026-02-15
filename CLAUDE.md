@@ -30,6 +30,7 @@ npm run format       # Prettier formatting
 ## Architecture
 
 ### Folder Structure
+
 ```
 src/
 ├── pages/           # Route page components
@@ -45,13 +46,25 @@ src/
 
 **State Management (Pinia)**: Stores use composition API syntax with `ref()` and `computed()`. See `stores/auth.ts` for the pattern.
 
-**API Calls**: Handled via composables in `composables/`. Uses native `fetch()`, not Axios. Backend URL from `VITE_API_URL` env var.
+**API Calls**: Use the `useApi()` composable from `composables/useApi.ts` for all non-auth API calls:
+
+```typescript
+import { useApi, API_URL } from '@/composables/useApi'
+
+const api = useApi()
+const data = await api.get<ResponseType>('/api/endpoint')
+const result = await api.post<ResponseType>('/api/endpoint', { body })
+// With auth: api.get('/api/endpoint', { token })
+```
+
+Uses native `fetch()`, not Axios. Backend URL from `VITE_API_URL` env var.
 
 **Components**: All use `<script setup lang="ts">` with typed props (`defineProps<>`) and emits (`defineEmits<>`).
 
 **Styling**: Vuetify utility classes (`d-flex`, `pa-8`, etc.) + scoped CSS. No Tailwind.
 
 ### Auth Flow
+
 1. `LoginPage.vue` / `SignupPage.vue` → form pages
 2. `useAuth()` composable → API calls
 3. `useAuthStore()` → manages user state, token in localStorage
