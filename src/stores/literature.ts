@@ -11,7 +11,10 @@ export const useLiteratureStore = defineStore('literature', () => {
   const error = ref<string | null>(null)
   const searched = ref(false)
   const showFetchModal = ref(false)
-  const selectedSources = ref<number[]>(AVAILABLE_SOURCES.map((s) => s.id))
+  const selectedSources = ref<number[]>(
+    AVAILABLE_SOURCES.filter((s) => !s.disabled).map((s) => s.id),
+  )
+  const fetchLimit = ref(30)
   const currentPage = ref(1)
   const itemsPerPage = ref(5)
 
@@ -21,7 +24,8 @@ export const useLiteratureStore = defineStore('literature', () => {
     return results.value.slice(start, start + itemsPerPage.value)
   })
 
-  const { searchLocal: apiSearchLocal, fetchFromSources: apiFetchFromSources } = useLiterature()
+  const { searchLocal: apiSearchLocal, getAll: apiGetAll, fetchFromSources: apiFetchFromSources } =
+    useLiterature()
 
   async function searchLocal() {
     if (!query.value.trim()) return
@@ -40,6 +44,22 @@ export const useLiteratureStore = defineStore('literature', () => {
     }
   }
 
+  async function loadAll() {
+    loading.value = true
+    error.value = null
+    searched.value = true
+    currentPage.value = 1
+    query.value = ''
+
+    try {
+      results.value = await apiGetAll()
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : 'Failed to load records'
+    } finally {
+      loading.value = false
+    }
+  }
+
   async function fetchFromSources() {
     if (!query.value.trim()) return
 
@@ -51,7 +71,7 @@ export const useLiteratureStore = defineStore('literature', () => {
       results.value = await apiFetchFromSources({
         query: query.value,
         sources: selectedSources.value,
-        limit: 30,
+        limit: fetchLimit.value,
         persist: true,
       })
       showFetchModal.value = false
@@ -63,11 +83,19 @@ export const useLiteratureStore = defineStore('literature', () => {
   }
 
   function selectAllSources() {
-    selectedSources.value = AVAILABLE_SOURCES.map((s) => s.id)
+    selectedSources.value = AVAILABLE_SOURCES.filter((s) => !s.disabled).map((s) => s.id)
   }
 
   function clearSources() {
     selectedSources.value = []
+  }
+
+  function clearResults() {
+    results.value = []
+    searched.value = false
+    query.value = ''
+    error.value = null
+    currentPage.value = 1
   }
 
   function clearError() {
@@ -83,14 +111,17 @@ export const useLiteratureStore = defineStore('literature', () => {
     searched,
     showFetchModal,
     selectedSources,
+    fetchLimit,
     currentPage,
     itemsPerPage,
     totalPages,
     paginatedResults,
     searchLocal,
+    loadAll,
     fetchFromSources,
     selectAllSources,
     clearSources,
+    clearResults,
     clearError,
   }
 })

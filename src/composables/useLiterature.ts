@@ -17,9 +17,13 @@ export function useLiterature() {
     )
   }
 
+  async function getAll(limit = 100): Promise<Literature[]> {
+    return api.get<Literature[]>(`/api/literature?limit=${limit}`)
+  }
+
   async function fetchFromSources(params: SearchParams): Promise<Literature[]> {
     return api.post<Literature[]>('/api/literature/search', params)
   }
 
-  return { searchLocal, fetchFromSources }
+  return { searchLocal, getAll, fetchFromSources }
 }

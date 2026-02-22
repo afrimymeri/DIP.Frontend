@@ -8,13 +8,14 @@ defineProps<{
 
 const modelValue = defineModel<boolean>({ required: true })
 const selectedSources = defineModel<number[]>('selectedSources', { required: true })
+const fetchLimit = defineModel<number>('fetchLimit', { required: true })
 
 const emit = defineEmits<{
   fetch: []
 }>()
 
 function selectAll() {
-  selectedSources.value = AVAILABLE_SOURCES.map((s) => s.id)
+  selectedSources.value = AVAILABLE_SOURCES.filter((s) => !s.disabled).map((s) => s.id)
 }
 
 function clearAll() {
@@ -38,10 +39,23 @@ function clearAll() {
           v-for="src in AVAILABLE_SOURCES"
           :key="src.id"
           v-model="selectedSources"
-          :label="src.name"
+          :label="src.disabled ? `${src.name} (${src.disabledReason})` : src.name"
           :value="src.id"
+          :disabled="src.disabled"
           density="compact"
           hide-details
+        />
+
+        <v-text-field
+          v-model.number="fetchLimit"
+          label="Results limit per source"
+          type="number"
+          variant="outlined"
+          density="compact"
+          hide-details
+          :min="1"
+          :max="30"
+          class="mt-6"
         />
       </v-card-text>
 

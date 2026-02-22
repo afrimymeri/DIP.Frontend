@@ -17,6 +17,7 @@ const {
   searched,
   showFetchModal,
   selectedSources,
+  fetchLimit,
   currentPage,
   totalPages,
   paginatedResults,
@@ -37,6 +38,13 @@ function onPageChange() {
     </div>
 
     <SearchBar v-model:query="query" :loading="loading" @search="store.searchLocal" />
+
+    <div v-if="!searched" class="d-flex justify-center mb-4">
+      <v-btn variant="text" size="small" :loading="loading" @click="store.loadAll()">
+        <v-icon start>mdi-database-outline</v-icon>
+        Browse all records
+      </v-btn>
+    </div>
 
     <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
 
@@ -64,6 +72,13 @@ function onPageChange() {
       @fetch="showFetchModal = true"
     />
 
+    <div v-if="searched && !loading && results.length > 0" class="d-flex justify-end mb-4">
+      <v-btn variant="text" size="small" @click="store.clearResults()">
+        <v-icon start>mdi-close-circle-outline</v-icon>
+        Clear results
+      </v-btn>
+    </div>
+
     <LiteratureCard v-for="item in paginatedResults" :key="item.id" :item="item" />
 
     <v-pagination
@@ -79,6 +94,7 @@ function onPageChange() {
     <FetchSourcesModal
       v-model="showFetchModal"
       v-model:selected-sources="selectedSources"
+      v-model:fetch-limit="fetchLimit"
       :query="query"
       :loading="fetchLoading"
       @fetch="store.fetchFromSources"

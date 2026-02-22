@@ -14,11 +14,13 @@ export interface Literature {
 export interface LiteratureSource {
   id: number
   name: string
+  disabled?: boolean
+  disabledReason?: string
 }
 
 export const AVAILABLE_SOURCES: LiteratureSource[] = [
   { id: 1, name: 'Semantic Scholar' },
-  { id: 2, name: 'DBLP' },
+  { id: 2, name: 'DBLP', disabled: true, disabledReason: 'Service currently unavailable' },
   { id: 3, name: 'OpenAlex' },
   { id: 4, name: 'CrossRef' },
   { id: 5, name: 'arXiv' },
