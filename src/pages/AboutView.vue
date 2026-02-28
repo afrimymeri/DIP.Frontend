@@ -33,8 +33,9 @@ import { AVAILABLE_SOURCES } from '@/types/literature'
           <v-chip
             v-for="source in AVAILABLE_SOURCES"
             :key="source.id"
-            color="primary"
-            variant="tonal"
+            :color="source.disabled ? undefined : 'primary'"
+            :variant="source.disabled ? 'outlined' : 'tonal'"
+            :disabled="source.disabled"
           >
             {{ source.name }}
           </v-chip>

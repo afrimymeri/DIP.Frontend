@@ -6,8 +6,10 @@ import LiteratureCard from '@/components/Literature/LiteratureCard.vue'
 import NoResultsCard from '@/components/Literature/NoResultsCard.vue'
 import FetchSourcesModal from '@/components/Literature/FetchSourcesModal.vue'
 import ResultsInfo from '@/components/Literature/ResultsInfo.vue'
+import { useExcelExport } from '@/composables/useExcelExport'
 
 const store = useLiteratureStore()
+const { exportResultsToExcel } = useExcelExport()
 const {
   query,
   results,
@@ -25,6 +27,10 @@ const {
 
 function onPageChange() {
   window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+function handleExport() {
+  exportResultsToExcel(results.value, query.value || undefined)
 }
 </script>
 
@@ -70,9 +76,14 @@ function onPageChange() {
       :page="currentPage"
       :items-per-page="store.itemsPerPage"
       @fetch="showFetchModal = true"
+      @export="handleExport"
     />
 
-    <div v-if="searched && !loading && results.length > 0" class="d-flex justify-end mb-4">
+    <div v-if="searched && !loading && results.length > 0" class="d-flex justify-end ga-2 mb-4">
+      <v-btn variant="text" size="small" @click="handleExport">
+        <v-icon start>mdi-file-excel-outline</v-icon>
+        Export to Excel
+      </v-btn>
       <v-btn variant="text" size="small" @click="store.clearResults()">
         <v-icon start>mdi-close-circle-outline</v-icon>
         Clear results
