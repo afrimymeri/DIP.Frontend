@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useLiterature } from '@/composables/useLiterature'
 import { AVAILABLE_SOURCES, type Literature } from '@/types/literature'
+import { useSearchHistoryStore } from './searchHistory'
 
 export const useLiteratureStore = defineStore('literature', () => {
   const query = ref('')
@@ -37,6 +38,10 @@ export const useLiteratureStore = defineStore('literature', () => {
 
     try {
       results.value = await apiSearchLocal(query.value)
+      if (results.value.length > 0) {
+        const historyStore = useSearchHistoryStore()
+        historyStore.saveSearch(query.value, results.value)
+      }
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Search failed'
     } finally {
@@ -75,6 +80,10 @@ export const useLiteratureStore = defineStore('literature', () => {
         persist: true,
       })
       showFetchModal.value = false
+      if (results.value.length > 0) {
+        const historyStore = useSearchHistoryStore()
+        historyStore.saveSearch(query.value, results.value)
+      }
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Fetch failed'
     } finally {

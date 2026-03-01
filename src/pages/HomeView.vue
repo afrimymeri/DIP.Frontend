@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useLiteratureStore } from '@/stores/literature'
+import { useSearchHistoryStore } from '@/stores/searchHistory'
 import SearchBar from '@/components/Literature/SearchBar.vue'
 import LiteratureCard from '@/components/Literature/LiteratureCard.vue'
 import NoResultsCard from '@/components/Literature/NoResultsCard.vue'
 import FetchSourcesModal from '@/components/Literature/FetchSourcesModal.vue'
 import ResultsInfo from '@/components/Literature/ResultsInfo.vue'
+import SearchHistoryPanel from '@/components/Literature/SearchHistoryPanel.vue'
 import { useExcelExport } from '@/composables/useExcelExport'
 
 const store = useLiteratureStore()
+const historyStore = useSearchHistoryStore()
 const { exportResultsToExcel } = useExcelExport()
 const {
   query,
@@ -32,83 +35,107 @@ function onPageChange() {
 function handleExport() {
   exportResultsToExcel(results.value, query.value || undefined)
 }
+
+async function handleRestore(entryId: number) {
+  const restoredResults = await historyStore.restoreEntry(entryId)
+  if (restoredResults) {
+    const entry = historyStore.entries.find((e) => e.id === entryId)
+    if (entry) {
+      query.value = entry.query
+    }
+    results.value = restoredResults
+    searched.value = true
+    currentPage.value = 1
+  }
+}
 </script>
 
 <template>
-  <v-container class="py-8" style="max-width: 900px">
-    <div class="text-center mb-8">
-      <h1 class="text-h3 font-weight-bold mb-2">Literature Search</h1>
-      <p class="text-body-1 text-medium-emphasis">
-        Search academic papers across multiple databases
-      </p>
-    </div>
+  <v-container class="py-8" style="max-width: 1200px">
+    <v-row>
+      <v-col cols="12" md="3">
+        <SearchHistoryPanel @restore="handleRestore" />
+      </v-col>
 
-    <SearchBar v-model:query="query" :loading="loading" @search="store.searchLocal" />
+      <v-col cols="12" md="9">
+        <div class="text-center mb-8">
+          <h1 class="text-h3 font-weight-bold mb-2">Literature Search</h1>
+          <p class="text-body-1 text-medium-emphasis">
+            Search academic papers across multiple databases
+          </p>
+        </div>
 
-    <div v-if="!searched" class="d-flex justify-center mb-4">
-      <v-btn variant="text" size="small" :loading="loading" @click="store.loadAll()">
-        <v-icon start>mdi-database-outline</v-icon>
-        Browse all records
-      </v-btn>
-    </div>
+        <SearchBar v-model:query="query" :loading="loading" @search="store.searchLocal" />
 
-    <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
+        <div v-if="!searched" class="d-flex justify-center mb-4">
+          <v-btn variant="text" size="small" :loading="loading" @click="store.loadAll()">
+            <v-icon start>mdi-database-outline</v-icon>
+            Browse all records
+          </v-btn>
+        </div>
 
-    <v-alert
-      v-if="error"
-      type="error"
-      variant="tonal"
-      closable
-      class="mb-4"
-      @click:close="store.clearError"
-    >
-      {{ error }}
-    </v-alert>
+        <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
 
-    <NoResultsCard
-      v-if="searched && !loading && results.length === 0"
-      @fetch="showFetchModal = true"
-    />
+        <v-alert
+          v-if="error"
+          type="error"
+          variant="tonal"
+          closable
+          class="mb-4"
+          @click:close="store.clearError"
+        >
+          {{ error }}
+        </v-alert>
 
-    <ResultsInfo
-      v-if="searched && !loading && results.length > 0"
-      :total="results.length"
-      :page="currentPage"
-      :items-per-page="store.itemsPerPage"
-      @fetch="showFetchModal = true"
-      @export="handleExport"
-    />
+        <NoResultsCard
+          v-if="searched && !loading && results.length === 0"
+          @fetch="showFetchModal = true"
+        />
 
-    <div v-if="searched && !loading && results.length > 0" class="d-flex justify-end ga-2 mb-4">
-      <v-btn variant="text" size="small" @click="handleExport">
-        <v-icon start>mdi-file-excel-outline</v-icon>
-        Export to Excel
-      </v-btn>
-      <v-btn variant="text" size="small" @click="store.clearResults()">
-        <v-icon start>mdi-close-circle-outline</v-icon>
-        Clear results
-      </v-btn>
-    </div>
+        <ResultsInfo
+          v-if="searched && !loading && results.length > 0"
+          :total="results.length"
+          :page="currentPage"
+          :items-per-page="store.itemsPerPage"
+          @fetch="showFetchModal = true"
+          @export="handleExport"
+        />
 
-    <LiteratureCard v-for="item in paginatedResults" :key="item.id" :item="item" />
+        <div
+          v-if="searched && !loading && results.length > 0"
+          class="d-flex justify-end ga-2 mb-4"
+        >
+          <v-btn variant="text" size="small" @click="handleExport">
+            <v-icon start>mdi-file-excel-outline</v-icon>
+            Export to Excel
+          </v-btn>
+          <v-btn variant="text" size="small" @click="store.clearResults()">
+            <v-icon start>mdi-close-circle-outline</v-icon>
+            Clear results
+          </v-btn>
+        </div>
 
-    <v-pagination
-      v-if="totalPages >= 2"
-      v-model="currentPage"
-      :length="totalPages"
-      :total-visible="5"
-      rounded="circle"
-      class="my-6"
-      @update:model-value="onPageChange"
-    />
+        <LiteratureCard v-for="item in paginatedResults" :key="item.id" :item="item" />
 
-    <FetchSourcesModal
-      v-model="showFetchModal"
-      v-model:selected-sources="selectedSources"
-      v-model:fetch-limit="fetchLimit"
-      :query="query"
-      :loading="fetchLoading"
-      @fetch="store.fetchFromSources"
-    />
+        <v-pagination
+          v-if="totalPages >= 2"
+          v-model="currentPage"
+          :length="totalPages"
+          :total-visible="5"
+          rounded="circle"
+          class="my-6"
+          @update:model-value="onPageChange"
+        />
+
+        <FetchSourcesModal
+          v-model="showFetchModal"
+          v-model:selected-sources="selectedSources"
+          v-model:fetch-limit="fetchLimit"
+          :query="query"
+          :loading="fetchLoading"
+          @fetch="store.fetchFromSources"
+        />
+      </v-col>
+    </v-row>
   </v-container>
 </template>

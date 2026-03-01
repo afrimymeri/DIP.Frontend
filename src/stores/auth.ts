@@ -93,6 +93,12 @@ export const useAuthStore = defineStore('auth', () => {
       }
     }
     clearAuth()
+
+    // Clear other stores to prevent state leaking between users
+    const { useLiteratureStore } = await import('./literature')
+    const { useSearchHistoryStore } = await import('./searchHistory')
+    useLiteratureStore().clearResults()
+    useSearchHistoryStore().clearHistory()
   }
 
   return {
