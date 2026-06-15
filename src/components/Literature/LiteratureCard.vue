@@ -1,9 +1,13 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { getSourceName, type Literature } from '@/types/literature'
+import AbstractModal from '@/components/Literature/AbstractModal.vue'
 
 defineProps<{
   item: Literature
 }>()
+
+const showAbstract = ref(false)
 
 function truncate(text?: string, length = 300): string {
   if (!text) return ''
@@ -37,6 +41,16 @@ function truncate(text?: string, length = 300): string {
       </v-chip>
       <v-spacer />
       <v-btn
+        v-if="item.abstract"
+        variant="text"
+        size="small"
+        color="secondary"
+        @click="showAbstract = true"
+      >
+        <v-icon start>mdi-text-box-outline</v-icon>
+        Abstract
+      </v-btn>
+      <v-btn
         v-if="item.url"
         :href="item.url"
         target="_blank"
@@ -59,5 +73,12 @@ function truncate(text?: string, length = 300): string {
         PDF
       </v-btn>
     </v-card-actions>
+
+    <AbstractModal
+      v-if="item.abstract"
+      v-model="showAbstract"
+      :title="item.title"
+      :abstract="item.abstract"
+    />
   </v-card>
 </template>
